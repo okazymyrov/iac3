@@ -1,0 +1,49 @@
+# Stack name: windows-cf-sgs-
+AWSTemplateFormatVersion: 2010-09-09
+Description: "Windows: Security Groups"
+
+Parameters:
+
+  WindowsEnvironmentType:
+    Type: String
+
+  WindowsSecurityGroupIngressManagementIp:
+    Type: String
+
+  WindowsVpcVpcId:
+    Type: String
+
+Mappings:
+
+  Instances:
+    management:
+      name: "management"
+
+Resources:
+
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-security-group.html
+  WindowsManagementSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Join [ "-", [!Ref AWS::StackName,!Ref WindowsEnvironmentType,!FindInMap [Instances, management, name]]]
+      VpcId: !Ref WindowsVpcVpcId
+      GroupDescription: "Allow ingress traffic on SSH from static IPs"
+      SecurityGroupIngress:
+        - CidrIp: !Ref WindowsSecurityGroupIngressManagementIp
+          IpProtocol: tcp
+          FromPort: 3389
+          ToPort: 3389
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      Tags: 
+        - Key: "Name"
+          Value: !Join [ "-", [!Ref AWS::StackName,!Ref WindowsEnvironmentType,!FindInMap [Instances, management, name]]]
+
+Outputs:
+
+  WindowsManagementSecurityGroupId:
+    Description: HTTP security group ID
+    Value: !Ref WindowsManagementSecurityGroup
+    Export:
+      Name: !Join [ "-", [!Ref AWS::StackName,"cf-sgs",!Ref WindowsEnvironmentType,"WindowsManagementSecurityGroupId"]]
