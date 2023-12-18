@@ -1,0 +1,122 @@
+# Stack name: linux-cf-l3-
+AWSTemplateFormatVersion: 2010-09-09
+Description: "Linux: Layer 3"
+
+Parameters:
+
+  LinuxEnvironmentType:
+    Type: String
+
+Mappings:
+    EnvironmentTypeToVpcCIDR:
+      dev:
+        CIDR: "10.2.0.0/24"
+      test: 
+        CIDR: "10.1.0.0/24"
+      prod: 
+        CIDR: "10.0.0.0/24"
+    Subnets:
+      management:
+        CiderIndex: "0"
+        name: "management"
+        type: "public"
+        az: "0"
+        RouteAssociation: "igw"
+
+Resources:
+
+# Section: VPC
+  LinuxVpc:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock: !FindInMap [EnvironmentTypeToVpcCIDR, !Ref LinuxEnvironmentType, CIDR]
+      Tags:
+        - Key: Name
+          Value: !Sub 'linux-${LinuxEnvironmentType}-vpc'
+
+# Section: Subnet
+
+  LinuxSubManagement:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      AvailabilityZone: !Select [ !FindInMap [Subnets, management, az], !GetAZs ]
+      CidrBlock: !Select [ !FindInMap [Subnets, management, CiderIndex], !Cidr [ !GetAtt LinuxVpc.CidrBlock, 16, 4 ]]
+      VpcId: !Ref LinuxVpc
+      Tags:
+        - Key: Name
+          Value: !Join [ "-", ["linux",!Ref LinuxEnvironmentType,!FindInMap [Subnets, management, name],!FindInMap [Subnets, management, type],!Select [ !FindInMap [Subnets, management, az], !GetAZs ]]]
+    DependsOn:
+        - LinuxVpc
+
+# Section: InternetGateway
+
+  LinuxInternetGateway:
+    Type: "AWS::EC2::InternetGateway"
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Join [ "-", ["linux",!Ref LinuxEnvironmentType,"internet-gateway"]]
+  
+  LinuxVpcGatewayAttachment:
+    Type: "AWS::EC2::VPCGatewayAttachment"
+    Properties:
+      VpcId: !Ref LinuxVpc
+      InternetGatewayId: !Ref LinuxInternetGateway
+    DependsOn:
+        - LinuxVpc
+        - LinuxInternetGateway
+
+# Section: routes
+
+# Route tables
+
+  LinuxIgwRouteTable:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId: !Ref LinuxVpc
+      Tags:
+        - Key: Name
+          Value: !Join [ "-", ["linux",!Ref LinuxEnvironmentType,"igw"]]
+    DependsOn:
+      - LinuxVpc
+
+# Routes
+
+  LinuxIgwRoute:
+    Type: "AWS::EC2::Route"
+    Properties:
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref LinuxInternetGateway
+      RouteTableId: !Ref LinuxIgwRouteTable
+    DependsOn:
+      - LinuxInternetGateway
+      - LinuxIgwRouteTable
+
+# Subent associations - Internet
+
+  LinuxIgwSubnetRouteTableAssociationLinuxSubManagement:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref LinuxIgwRouteTable
+      SubnetId: !Ref LinuxSubManagement
+    DependsOn:
+      - LinuxIgwRouteTable
+      - LinuxSubManagement
+
+Outputs:
+
+# VPC
+
+  LinuxVpcVpcId:
+    Description: Cobalt Stike's VPC ID
+    Value: !Ref LinuxVpc # But with '!GetAtt LinuxVpc.VpcId'
+    Export:
+      Name: !Join [ "-", ["linux-cf-l3",!Ref LinuxEnvironmentType,"LinuxVpcVpcId"]]
+
+# Subnets
+
+  LinuxSubManagementSubnetId:
+    Description: Management SubnetId
+    Value: !GetAtt LinuxSubManagement.SubnetId
+    Export:
+      Name: !Join [ "-", ["linux-cf-l3",!Ref LinuxEnvironmentType,"LinuxSubManagementSubnetId"]]
