@@ -13,9 +13,14 @@
 # To-Do
 
 ## Windows
-- [ ] Disable Windows Defender via PowerShell during installation
-- [ ] 
+- [ ] Disable Windows Defender via PowerShell during deployment
+- [ ] Install Tailscale
+- [ ] Log on Tailscale
+
 
 ## Kali
+- [ ] Update and update to the latest version during deployment.
 - [ ] Installation of default pakages
 - [ ] Configuration of default pakages
+- [ ] Install Tailscale
+- [ ] Log on Tailscale
