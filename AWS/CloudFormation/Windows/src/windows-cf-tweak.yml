@@ -1,6 +1,6 @@
 # Stack name: windows-cf-sgs-tweak-
 AWSTemplateFormatVersion: 2010-09-09
-Description: "Windows: Layer 3"
+Description: "Windows: adjust the security group"
 
 Metadata:
   References:
