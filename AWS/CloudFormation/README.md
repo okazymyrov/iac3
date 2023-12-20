@@ -1,3 +1,7 @@
+# Documentation
+
+1. It is assumed that a public key is avalible Amazon EC2 ([Create key pairs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/create-key-pairs.html#create-key-pair-cloudformation)).
+
 # To-Do
 
 - [ ] Disabling Windows Defender via PowerShell during installation
