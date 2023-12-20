@@ -5,10 +5,13 @@
 
 ## Kali
 
+- By default, [linux-cf-tweak.yml](Kali/linux-cf-tweak.yml) makes changes to security groups to allow TCP 80 and 443.
+- The Linux distribution can be edited in [linux-cf-instances.yml](Kali/linux-cf-instances.yml) (default Kali).
+
 ## Windows
 
-- By default, windows-cf-tweak.yml makes changes to security groups to allow TCP 80 and 443.
-- The Windows distribution can be edited in windows-cf-instances.yml (default Windows Server 2022).
+- By default, [windows-cf-tweak.yml](Windows/windows-cf-tweak.yml) makes changes to security groups to allow TCP 80 and 443.
+- The Windows distribution can be edited in [windows-cf-instances.yml](Windows/windows-cf-instances.yml) (default Windows Server 2022).
 
 # To-Do
 
