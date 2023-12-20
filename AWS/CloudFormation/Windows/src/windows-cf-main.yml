@@ -6,10 +6,6 @@ Metadata:
   References:
     Documentation: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-nested-stacks.html
 
-# Notes:
-#     - By default windows-cf-tweak.yml make modifications to security groups to allow TCP 80 and 443.
-#     - The Windows distribution can be edited in windows-cf-instances.yml (default Kali).
-
 # Structure:
 # - Parameters
 # - Mappings
