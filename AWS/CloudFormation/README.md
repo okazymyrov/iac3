@@ -1,7 +1,7 @@
 # Documentation
 
 ## Common
-- It is assumed that a public key is avalible Amazon EC2 ([Create key pairs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/create-key-pairs.html#create-key-pair-cloudformation)).
+- It is assumed that a public key is avalible Amazon EC2 ([Create key pairs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/create-key-pairs.html#create-key-pair-cloudformation)). Read [Amazon EC2 key pairs and Windows instances](https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2-key-pairs.html) before create.
 
 ## Kali
 
