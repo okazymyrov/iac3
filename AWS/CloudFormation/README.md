@@ -13,9 +13,9 @@
 # To-Do
 
 ## Windows
-- [ ] Disabling Windows Defender via PowerShell during installation
-- [ ] Installation of default pakages
-- [ ] Configuration of default pakages
+- [ ] Disable Windows Defender via PowerShell during installation
+- [ ] 
 
 ## Kali
-- [ ] 
+- [ ] Installation of default pakages
+- [ ] Configuration of default pakages
