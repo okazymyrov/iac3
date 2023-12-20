@@ -1,0 +1,122 @@
+# Stack name: windows-cf-l3-
+AWSTemplateFormatVersion: 2010-09-09
+Description: "Windows: Layer 3"
+
+Parameters:
+
+  WindowsEnvironmentType:
+    Type: String
+
+Mappings:
+    EnvironmentTypeToVpcCIDR:
+      dev:
+        CIDR: "10.2.0.0/24"
+      test: 
+        CIDR: "10.1.0.0/24"
+      prod: 
+        CIDR: "10.0.0.0/24"
+    Subnets:
+      management:
+        CiderIndex: "0"
+        name: "management"
+        type: "public"
+        az: "0"
+        RouteAssociation: "igw"
+
+Resources:
+
+# Section: VPC
+  WindowsVpc:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock: !FindInMap [EnvironmentTypeToVpcCIDR, !Ref WindowsEnvironmentType, CIDR]
+      Tags:
+        - Key: Name
+          Value: !Sub 'windows-${WindowsEnvironmentType}-vpc'
+
+# Section: Subnet
+
+  WindowsSubManagement:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      AvailabilityZone: !Select [ !FindInMap [Subnets, management, az], !GetAZs ]
+      CidrBlock: !Select [ !FindInMap [Subnets, management, CiderIndex], !Cidr [ !GetAtt WindowsVpc.CidrBlock, 16, 4 ]]
+      VpcId: !Ref WindowsVpc
+      Tags:
+        - Key: Name
+          Value: !Join [ "-", [!Ref AWS::StackName,!Ref WindowsEnvironmentType,!FindInMap [Subnets, management, name],!FindInMap [Subnets, management, type],!Select [ !FindInMap [Subnets, management, az], !GetAZs ]]]
+    DependsOn:
+        - WindowsVpc
+
+# Section: InternetGateway
+
+  WindowsInternetGateway:
+    Type: "AWS::EC2::InternetGateway"
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Join [ "-", [!Ref AWS::StackName,!Ref WindowsEnvironmentType,"internet-gateway"]]
+  
+  WindowsVpcGatewayAttachment:
+    Type: "AWS::EC2::VPCGatewayAttachment"
+    Properties:
+      VpcId: !Ref WindowsVpc
+      InternetGatewayId: !Ref WindowsInternetGateway
+    DependsOn:
+        - WindowsVpc
+        - WindowsInternetGateway
+
+# Section: routes
+
+# Route tables
+
+  WindowsIgwRouteTable:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId: !Ref WindowsVpc
+      Tags:
+        - Key: Name
+          Value: !Join [ "-", [!Ref AWS::StackName,!Ref WindowsEnvironmentType,"igw"]]
+    DependsOn:
+      - WindowsVpc
+
+# Routes
+
+  WindowsIgwRoute:
+    Type: "AWS::EC2::Route"
+    Properties:
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref WindowsInternetGateway
+      RouteTableId: !Ref WindowsIgwRouteTable
+    DependsOn:
+      - WindowsInternetGateway
+      - WindowsIgwRouteTable
+
+# Subent associations - Internet
+
+  WindowsIgwSubnetRouteTableAssociationWindowsSubManagement:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref WindowsIgwRouteTable
+      SubnetId: !Ref WindowsSubManagement
+    DependsOn:
+      - WindowsIgwRouteTable
+      - WindowsSubManagement
+
+Outputs:
+
+# VPC
+
+  WindowsVpcVpcId:
+    Description: Cobalt Stike's VPC ID
+    Value: !Ref WindowsVpc # But with '!GetAtt WindowsVpc.VpcId'
+    Export:
+      Name: !Join [ "-", [!Ref AWS::StackName,"cf-l3",!Ref WindowsEnvironmentType,"WindowsVpcVpcId"]]
+
+# Subnets
+
+  WindowsSubManagementSubnetId:
+    Description: Management SubnetId
+    Value: !GetAtt WindowsSubManagement.SubnetId
+    Export:
+      Name: !Join [ "-", [!Ref AWS::StackName,"cf-l3",!Ref WindowsEnvironmentType,"WindowsSubManagementSubnetId"]]

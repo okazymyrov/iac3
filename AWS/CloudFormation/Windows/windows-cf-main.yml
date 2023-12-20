@@ -1,0 +1,133 @@
+# Stack name: windows-cf-main-
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "Windows: root template"
+
+Metadata:
+  References:
+    Documentation: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-nested-stacks.html
+
+# Structure:
+# - Parameters
+# - Mappings
+# - Resources
+#   - windows-cf-eips
+#     - Outputs
+#   - windows-cf-l3
+#     - Outputs
+#   - windows-cf-sgs
+#     - Outputs
+#   - windows-cf-instances
+#     - Outputs
+#   - windows-cf-tweak
+#     - Outputs
+# - Outputs
+
+Parameters:
+
+  WindowsEnvironmentType:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - test
+      - prod
+    Description: Choose dev, test or prod. Default is dev.
+
+  WindowsSecurityGroupIngressManagementIp:
+    Type: String
+    Default: 127.0.0.1/32
+    AllowedPattern: ^(\b25[0-5]|\b2[0-4][0-9]|\b[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}\/(\b[12][0-9]?|\b3[0-2]|\b[0-9])$
+    Description: Enter the primary management IP. Extra IP addresses can be added in windows-cf-tweak.yml.
+
+  WindowsManagementSshKey:
+    Type: String
+    Default: c2-ok
+    Description: The SSH key used to access the instances.
+
+  # WindowsBaseS3Url = https://windows-cloudformation.s3.eu-central-1.amazonaws.com
+  # Description: Base URL with templates from an S3 bucket
+  WindowsTemplateEips:
+    Type: String
+    # Default: WindowsBaseS3Url/windows-cf-eips.yml
+    Default: "https://windows-cloudformation.s3.eu-central-1.amazonaws.com/windows-cf-eips.yml"
+    AllowedPattern: ^https\:\/\/(s3-|s3\.)?(.*)\.amazonaws\.com\/.*$
+    Description: Enter location of file containing the template body. The URL must point to a template that's located in an Amazon S3 bucket. 
+
+  WindowsTemplateL3:
+    Type: String
+    # Default: WindowsBaseS3Url/windows-cf-l3.yml
+    Default: "https://windows-cloudformation.s3.eu-central-1.amazonaws.com/windows-cf-l3.yml"
+    AllowedPattern: ^https\:\/\/(s3-|s3\.)?(.*)\.amazonaws\.com\/.*$
+    Description: Enter location of file containing the template body. The URL must point to a template that's located in an Amazon S3 bucket. 
+
+  WindowsTemplateSgs:
+    Type: String
+    # Default: WindowsBaseS3Url/windows-cf-sgs.yml
+    Default: "https://windows-cloudformation.s3.eu-central-1.amazonaws.com/windows-cf-sgs.yml"
+    AllowedPattern: ^https\:\/\/(s3-|s3\.)?(.*)\.amazonaws\.com\/.*$
+    Description: Enter location of file containing the template body. The URL must point to a template that's located in an Amazon S3 bucket. 
+
+  WindowsTemplateInstances:
+    Type: String
+    # Default: WindowsBaseS3Url/windows-cf-instances.yml
+    Default: "https://windows-cloudformation.s3.eu-central-1.amazonaws.com/windows-cf-instances.yml"
+    AllowedPattern: ^https\:\/\/(s3-|s3\.)?(.*)\.amazonaws\.com\/.*$
+    Description: Enter location of file containing the template body. The URL must point to a template that's located in an Amazon S3 bucket. 
+
+  WindowsTemplateTweak:
+    Type: String
+    # Default: WindowsBaseS3Url/windows-cf-tweak-stb.yml
+    Default: "https://windows-cloudformation.s3.eu-central-1.amazonaws.com/windows-cf-tweak-stb.yml"
+    AllowedPattern: ^https\:\/\/(s3-|s3\.)?(.*)\.amazonaws\.com\/.*$
+    Description: Enter location of file containing the template body. The URL must point to a template that's located in an Amazon S3 bucket.
+
+Resources:
+
+  WindowsCfEips:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Ref WindowsTemplateEips
+      Parameters:
+        WindowsEnvironmentType: !Ref WindowsEnvironmentType
+
+  WindowsCfL3:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Ref WindowsTemplateL3
+      Parameters:
+        WindowsEnvironmentType: !Ref WindowsEnvironmentType
+
+  WindowsCfSgs:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Ref WindowsTemplateSgs
+      Parameters:
+        WindowsEnvironmentType: !Ref WindowsEnvironmentType
+        WindowsSecurityGroupIngressManagementIp: !Ref WindowsSecurityGroupIngressManagementIp
+        WindowsVpcVpcId: !GetAtt [WindowsCfL3, Outputs.WindowsVpcVpcId]
+
+  WindowsCfInstances:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Ref WindowsTemplateInstances
+      Parameters:
+        WindowsEnvironmentType: !Ref WindowsEnvironmentType
+        WindowsManagementSshKey: !Ref WindowsManagementSshKey
+        WindowsEipManagementAllocationId: !GetAtt [WindowsCfEips, Outputs.WindowsEipManagementAllocationId]
+        WindowsSubManagementSubnetId: !GetAtt [WindowsCfL3, Outputs.WindowsSubManagementSubnetId]
+        WindowsManagementSecurityGroupId: !GetAtt [WindowsCfSgs, Outputs.WindowsManagementSecurityGroupId]
+
+  WindowsCfTweak:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Ref WindowsTemplateTweak
+      Parameters:
+        WindowsEnvironmentType: !Ref WindowsEnvironmentType
+        WindowsManagementSecurityGroupId: !GetAtt [WindowsCfSgs, Outputs.WindowsManagementSecurityGroupId]
+
+Outputs:
+
+  WindowsManagementInstancePublicIp:
+    Description: Public IP of the Windows server
+    Value: !GetAtt [WindowsCfInstances, Outputs.WindowsManagementInstancePublicIp]
+    
