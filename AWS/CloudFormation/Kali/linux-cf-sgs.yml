@@ -17,7 +17,7 @@ Mappings:
 
   Instances:
     management:
-      name: "management"
+      name: "kali"
 
 Resources:
 

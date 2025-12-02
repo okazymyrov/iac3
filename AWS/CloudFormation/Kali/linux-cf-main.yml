@@ -44,40 +44,40 @@ Parameters:
     Default: c2-ok
     Description: The SSH key used to access the instances.
 
-  # LinuxBaseS3Url = https://linux-cloudformation.s3.eu-central-1.amazonaws.com
+  # LinuxBaseS3Url = https://75553b16-f136-4b9e-8346-5d7caa42f314.s3.eu-central-1.amazonaws.com/kali
   # Description: Base URL with templates from an S3 bucket
   LinuxTemplateEips:
     Type: String
     # Default: LinuxBaseS3Url/linux-cf-eips.yml
-    Default: "https://linux-cloudformation.s3.eu-central-1.amazonaws.com/linux-cf-eips.yml"
+    Default: "https://75553b16-f136-4b9e-8346-5d7caa42f314.s3.eu-central-1.amazonaws.com/kali/linux-cf-eips.yml"
     AllowedPattern: ^https\:\/\/(s3-|s3\.)?(.*)\.amazonaws\.com\/.*$
     Description: Enter location of file containing the template body. The URL must point to a template that's located in an Amazon S3 bucket. 
 
   LinuxTemplateL3:
     Type: String
     # Default: LinuxBaseS3Url/linux-cf-l3.yml
-    Default: "https://linux-cloudformation.s3.eu-central-1.amazonaws.com/linux-cf-l3.yml"
+    Default: "https://75553b16-f136-4b9e-8346-5d7caa42f314.s3.eu-central-1.amazonaws.com/kali/linux-cf-l3.yml"
     AllowedPattern: ^https\:\/\/(s3-|s3\.)?(.*)\.amazonaws\.com\/.*$
     Description: Enter location of file containing the template body. The URL must point to a template that's located in an Amazon S3 bucket. 
 
   LinuxTemplateSgs:
     Type: String
     # Default: LinuxBaseS3Url/linux-cf-sgs.yml
-    Default: "https://linux-cloudformation.s3.eu-central-1.amazonaws.com/linux-cf-sgs.yml"
+    Default: "https://75553b16-f136-4b9e-8346-5d7caa42f314.s3.eu-central-1.amazonaws.com/kali/linux-cf-sgs.yml"
     AllowedPattern: ^https\:\/\/(s3-|s3\.)?(.*)\.amazonaws\.com\/.*$
     Description: Enter location of file containing the template body. The URL must point to a template that's located in an Amazon S3 bucket. 
 
   LinuxTemplateInstances:
     Type: String
     # Default: LinuxBaseS3Url/linux-cf-instances.yml
-    Default: "https://linux-cloudformation.s3.eu-central-1.amazonaws.com/linux-cf-instances.yml"
+    Default: "https://75553b16-f136-4b9e-8346-5d7caa42f314.s3.eu-central-1.amazonaws.com/kali/linux-cf-instances.yml"
     AllowedPattern: ^https\:\/\/(s3-|s3\.)?(.*)\.amazonaws\.com\/.*$
     Description: Enter location of file containing the template body. The URL must point to a template that's located in an Amazon S3 bucket. 
 
   LinuxTemplateTweak:
     Type: String
-    # Default: LinuxBaseS3Url/linux-cf-tweak-stb.yml
-    Default: "https://linux-cloudformation.s3.eu-central-1.amazonaws.com/linux-cf-tweak-stb.yml"
+    # Default: LinuxBaseS3Url/linux-cf-tweak.yml
+    Default: "https://75553b16-f136-4b9e-8346-5d7caa42f314.s3.eu-central-1.amazonaws.com/kali/linux-cf-tweak.yml"
     AllowedPattern: ^https\:\/\/(s3-|s3\.)?(.*)\.amazonaws\.com\/.*$
     Description: Enter location of file containing the template body. The URL must point to a template that's located in an Amazon S3 bucket.
 
@@ -124,7 +124,7 @@ Resources:
       Parameters:
         LinuxEnvironmentType: !Ref LinuxEnvironmentType
         LinuxManagementSecurityGroupId: !GetAtt [LinuxCfSgs, Outputs.LinuxManagementSecurityGroupId]
-        WindowsSecurityGroupIngressManagementIp: !Ref WindowsSecurityGroupIngressManagementIp
+        LinuxSecurityGroupIngressManagementIp: !Ref LinuxSecurityGroupIngressManagementIp
 
 Outputs:
 

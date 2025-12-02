@@ -18,7 +18,7 @@ Mappings:
     Subnets:
       management:
         CiderIndex: "0"
-        name: "management"
+        name: "kali"
         type: "public"
         az: "0"
         RouteAssociation: "igw"
