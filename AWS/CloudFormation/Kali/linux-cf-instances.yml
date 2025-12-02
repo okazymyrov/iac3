@@ -22,7 +22,7 @@ Mappings:
 
   Instances:
     management:
-      name: "management"
+      name: "kali"
       az: "0"
       InstanceType: "t3.medium"
 
@@ -31,15 +31,15 @@ Resources:
   LinuxManagementInstance:
     Type: AWS::EC2::Instance
     Properties:
-      # Kali Linux kali-last-snapshot (2023.4.0)
-      # Latest AMI ID can be found in GUI (EC2 -> AMIs -> Public images -> "kali-last-snapshot")
-      ImageId: ami-084b4d9ebbfd1e08a
+      # Kali Linux kali-last-snapshot
+      # Latest AMI ID can be found in GUI (EC2 -> AMIs -> Public images -> "kali-last-snapshot-amd64")
+      ImageId: ami-04bf80474205c528b
       InstanceType: !FindInMap [Instances, management, InstanceType]
       BlockDeviceMappings:
-        - DeviceName: /dev/sda1
+        - DeviceName: /dev/xvda
           Ebs:
             Encrypted: true
-            VolumeSize: 80
+            VolumeSize: 200
             DeleteOnTermination: true
       KeyName: !Ref LinuxManagementSshKey
       AvailabilityZone: !Select [ !FindInMap [Instances, management, az], !GetAZs ]
